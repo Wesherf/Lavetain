@@ -1,10 +1,9 @@
 <header class="header">
   <div class="container navbar">
     <a href="index.php" class="navbar__logo" style="text-decoration: none;">Lavetain</a>    
-    <nav class="navbar__menu">
-      <a href="index.php">Главная</a>
-      <a href="index.php#catalog">Каталог</a>
-    </nav>
+<nav class="navbar__menu">
+  <a href="index.php">Главная</a>
+  <a href="catalog.php">Каталог одежды</a>  </nav>  
 
     <div class="navbar__actions">
       <?php if (isset($_SESSION['user_id'])): ?>
