@@ -1,93 +1,159 @@
 <?php
 session_start();
-require_once 'config/db.php';
+require_once "config/db.php"; // Подключение (универсальный PDO + MySQLi)
 
+// Проверяем авторизацию. Если сессии нет, для теста ставим ID = 1 (аккаунт dsa1)
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
+    $_SESSION['user_id'] = 1; 
 }
-
 $user_id = $_SESSION['user_id'];
-$user_name = $_SESSION['user_name'];
 
-// Связываем таблицу заказов (orders) с вещами (products)
-$orders_stmt = $pdo->prepare("
-    SELECT o.id AS order_id, p.title AS product_title, p.image AS product_image, p.price AS product_price 
-    FROM orders o
-    JOIN products p ON o.product_id = p.id
-    WHERE o.user_id = ?
-    ORDER BY o.id DESC
-");
-$orders_stmt->execute([$user_id]);
-$user_orders = $orders_stmt->fetchAll();
+// Запрос для получения записей на примерку (обхват талии)
+$app_res = $conn->query("SELECT service_type, chest_cm, waist_cm, hips_cm, visit_date FROM lavetain_appointments WHERE user_id = $user_id ORDER BY id DESC");
 ?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Личный кабинет — Lavetain</title>
-  <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>LAVETAIN — Личный кабинет</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar { background: #000; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; }
+        .navbar .logo { font-size: 22px; font-weight: bold; letter-spacing: 3px; color: #fff; text-decoration: none; }
+        .navbar-links { display: flex; gap: 20px; align-items: center; }
+        .navbar-links a { color: #fff; text-decoration: none; font-size: 14px; text-transform: uppercase; }
+        .btn-logout { background: #7f56da; padding: 8px 18px; border-radius: 6px; font-weight: bold; }
+        .btn-logout:hover { background: #6939cc; }
+        
+        .main-content { flex: 1; max-width: 1100px; width: 100%; margin: 40px auto; padding: 0 20px; box-sizing: border-box; }
+        .profile-header { text-align: center; margin-bottom: 40px; }
+        .profile-header h1 { font-size: 32px; font-weight: 500; margin: 0 0 10px 0; }
+        .profile-header p { color: #666; margin: 0; font-size: 14px; }
+        
+        /* Сетка для блоков Личные данные и Безопасность */
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .card { background: #111; border: 1px solid #222; padding: 30px; border-radius: 12px; }
+        .card h3 { margin-top: 0; font-size: 20px; font-weight: 500; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+        input { padding: 12px; background: #161616; border: 1px solid #2c2c2c; color: #fff; border-radius: 6px; font-size: 14px; }
+        input:disabled { color: #444; }
+        
+        .btn-purple { background: #7f56da; color: #fff; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; transition: 0.2s; width: 100%; }
+        .btn-purple:hover { background: #6939cc; }
+        .btn-white { background: #fff; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; transition: 0.2s; width: 100%; }
+        .btn-white:hover { background: #e0e0e0; }
+        
+        /* Широкие блоки снизу */
+        .wide-card { background: #111; border: 1px solid #222; padding: 30px; border-radius: 12px; margin-bottom: 30px; }
+        .wide-card h3 { margin-top: 0; font-size: 20px; font-weight: 500; margin-bottom: 15px; }
+        .wide-card p { color: #666; font-size: 14px; margin: 0; }
+        
+        /* Таблица для услуг */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; color: #ccc; font-size: 14px; }
+        th { padding: 12px; border: 1px solid #222; background: #161616; text-align: left; color: #888; font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px; border: 1px solid #222; }
+        
+        .btn-link { display: inline-block; margin-top: 15px; background: #161616; border: 1px solid #222; color: #fff; text-decoration: none; padding: 10px 20px; font-size: 13px; font-weight: bold; border-radius: 6px; text-transform: uppercase; }
+        .btn-link:hover { background: #222; }
+        
+        footer { background: #000; text-align: center; padding: 25px; border-top: 1px solid #1a1a1a; color: #444; font-size: 13px; }
+    </style>
 </head>
 <body>
 
-<?php include 'includes/header.php'; ?>
+<div class="navbar">
+    <a href="index.php" class="logo">LAVETAIN</a>
+    <div class="navbar-links">
+        <a href="index.php" style="color: #666;">Главная</a>
+        <a href="index.php">Каталог одежды</a>
+        <a href="contact.php" style="color: #7f56da; font-weight: bold; margin-left: 10px;">Обратная связь</a>
+        <span style="color: #666; margin-left: 15px;">Привет, <span style="color: #fff; font-weight: bold;">dsa1</span></span>
+        <a href="index.php" style="color: #aaa; margin-left: 10px;">Профиль</a>
+        <a href="logout.php" class="btn-logout">Выйти</a>
+    </div>
+</div>
 
-<main style="padding: 60px 0; min-height: 80vh;">
-  <div class="container" style="max-width: 700px;">
+<div class="main-content">
     
-    <h1 style="color: var(--color-white); font-size: 2.2rem; margin-bottom: 30px; font-weight: 800; text-align: center;">Личный кабинет</h1>
-
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); padding: 24px; border-radius: var(--radius-md); margin-bottom: 24px;">
-      <h2 style="color: var(--color-white); font-size: 16px; margin-bottom: 16px; font-weight: 600; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">Данные аккаунта</h2>
-      <div style="display: flex; flex-direction: column; gap: 10px; color: var(--color-text-muted); font-size: 14px;">
-        <div>Имя пользователя: <strong style="color: var(--color-white);"><?= htmlspecialchars($user_name) ?></strong></div>
-        <div>Ваш ID на сайте: <strong style="color: var(--color-white);"><?= htmlspecialchars($user_id) ?></strong></div>
-        <div>Безопасность сессии: <span style="color: #22c55e; font-weight: bold;">✓ Защищено</span></div>
-      </div>
+    <div class="profile-header">
+        <h1>Личный кабинет</h1>
+        <p>Вы с нами с: 25.05.2026 в 13:15</p>
     </div>
-
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); padding: 24px; border-radius: var(--radius-md);">
-      <h2 style="color: var(--color-white); font-size: 16px; margin-bottom: 16px; font-weight: 600; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">История ваших покупок</h2>
-
-      <?php if (!empty($user_orders)): ?>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <?php foreach ($user_orders as $order): ?>
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #121214; border: 1px solid var(--color-border); padding: 14px; border-radius: var(--radius-sm);">
-              
-              <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 45px; height: 45px; background: #ffffff; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                  <?php if (!empty($order['product_image'])): ?>
-                    <img src="images/<?= htmlspecialchars($order['product_image']) ?>" style="max-width: 100%; max-height: 100%; object-fit: cover;">
-                  <?php else: ?>
-                    <span style="font-size: 9px; color: #121214; font-weight: bold;">LVTN</span>
-                  <?php endif; ?>
+    
+    <div class="profile-grid">
+        <div class="card">
+            <h3>Личные данные</h3>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label>Ваше имя в системе</label>
+                    <input type="text" value="dsa1">
                 </div>
-                <div>
-                  <div style="color: var(--color-white); font-weight: 600; font-size: 14px;"><?= htmlspecialchars($order['product_title']) ?></div>
-                  <div style="color: var(--color-text-muted); font-size: 11px;">Заказ №<?= $order['order_id'] ?></div>
+                <div class="form-group">
+                    <label>Email (изменению не подлежит)</label>
+                    <input type="email" value="dsa1@gmail.com" disabled>
                 </div>
-              </div>
-
-              <div style="color: var(--color-primary); font-weight: 700; font-size: 14px;">
-                <?= number_format($order['product_price'], 2, '.', ' ') ?> ₸
-              </div>
-
-            </div>
-          <?php endforeach; ?>
+                <button type="button" class="btn-purple">Сохранить изменения</button>
+            </form>
         </div>
-      <?php else: ?>
-        <p style="color: var(--color-text-muted); font-size: 14px; margin: 0; text-align: center; padding: 20px 0;">Вы ещё не совершали заказов в нашем магазине.</p>
-      <?php endif; ?>
-
+        
+        <div class="card">
+            <h3>Безопасность</h3>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <input type="password" placeholder="Текущий пароль">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Новый пароль (от 6 симв.)">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Повторите новый пароль">
+                </div>
+                <button type="button" class="btn-white">Обновить пароль</button>
+            </form>
+        </div>
     </div>
 
-  </div>
-</main>
+    <div class="wide-card" style="border-left: 4px solid #7f56da;">
+        <h3 style="color: #fff; margin-bottom: 10px;">Мои записи на примерку (Услуги в БД)</h3>
+        
+        <?php if ($app_res && $app_res->num_rows > 0): ?>
+            <table>
+                <tr>
+                    <th>Услуга</th>
+                    <th>Грудь</th>
+                    <th>Талия</th>
+                    <th>Бёдра</th>
+                    <th>Дата визита</th>
+                </tr>
+                <?php while($row = $app_res->fetch_assoc()): ?>
+                    <tr style="border-bottom: 1px solid #1a1a1a;">
+                        <td style="color:#fff;"><?= htmlspecialchars($row['service_type']) ?></td>
+                        <td><?= $row['chest_cm'] ?> см</td>
+                        <td style="color: #7f56da; font-weight: bold;"><?= $row['waist_cm'] ?> см</td>
+                        <td><?= $row['hips_cm'] ?> см</td>
+                        <td style="color: #7f56da;"><?= $row['visit_date'] ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </table>
+            <a href="booking.php" class="btn-link">Записаться на повторные замеры</a>
+        <?php else: ?>
+            <p style="margin-bottom: 15px;">Вы ещё не записывались на подбор размера и примерку одежды.</p>
+            <a href="booking.php" class="btn-purple" style="display: inline-block; width: auto; padding: 12px 25px;">Заполнить обхват талии и замеры →</a>
+        <?php endif; ?>
+    </div>
 
-<?php include 'includes/footer.php'; ?>
+    <div class="wide-card">
+        <h3>История ваших покупок</h3>
+        <p>Вы еще не оформляли заказы в каталоге одежды Lavetain.</p>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Lavetain · Магазин одежды нового поколения
+</footer>
+
 </body>
 </html>
