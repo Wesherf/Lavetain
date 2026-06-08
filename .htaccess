@@ -1,0 +1,11 @@
+# .htaccess — настройки сервера Apache
+
+# Включаем модуль перезаписи URL
+Options -Indexes
+
+# Перенаправляем ошибку 404 на нашу страницу
+ErrorDocument 404 /404.php
+
+# Для других ошибок (по желанию):
+# ErrorDocument 403 /403.php
+# ErrorDocument 500 /500.php

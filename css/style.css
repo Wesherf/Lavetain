@@ -1,0 +1,120 @@
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-main);
+}
+/* Контейнер */
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+/* Кнопки */
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-outline {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Header */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  background: rgba(15,15,18,0.85);
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar {
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar__logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.navbar__menu {
+  display: flex;
+  gap: 32px;
+}
+
+.navbar__menu a {
+  color: var(--color-text-muted);
+  transition: 0.2s;
+}
+
+.navbar__menu a:hover {
+  color: var(--color-white);
+}
+/* кнопки*/
+.btn {
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.btn-outline {
+  border: 1px solid var(--color-border);
+  color: var(--color-white);
+}
+/* Hero */
+
+.hero {
+  padding: 100px 0;
+  background: var(--color-primary);
+  color: white;
+  text-align: center;
+}
+
+.hero__title {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero__subtitle {
+  margin-bottom: 30px;
+  font-size: 20px;
+}
+
+/* Footer */
+
+.footer {
+  padding: 30px;
+  text-align: center;
+}
