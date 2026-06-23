@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+# .htaccess — настройки сервера Apache
+
+# Включаем модуль перезаписи URL
+Options -Indexes
+
+# Перенаправляем ошибку 404 на нашу страницу
+ErrorDocument 404 /404.php
+
+# Для других ошибок (по желанию):
+# ErrorDocument 403 /403.php
+# ErrorDocument 500 /500.php
+=======
 <IfModule dir_module>
     DirectoryIndex index.php index.html
 </IfModule>
@@ -8,3 +21,4 @@ AddCharset UTF-8 .html
    Header unset ETag
 </FilesMatch>
 Header set X-Content-Type-Options nosniff
+>>>>>>> 68f94e9504b026ff2515e1341e991a0ca2292f54
