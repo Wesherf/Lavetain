@@ -72,7 +72,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <input class="form-input" type="password" name="password" required placeholder="Ваш пароль" style="width:100%; padding:12px; background:var(--color-bg); border:1px solid var(--color-border); border-radius:var(--radius-md); color:white;">
         </div>
 
-        <button class="btn btn-primary" type="submit" style="width:100%;">Войти в систему</button>
+        <button class="btn btn-primary" type="submit" style="width:100%; margin-bottom: var(--spacing-md);">Войти в систему</button>
+        
+        <div style="text-align: center; font-size: 14px; color: var(--color-text-muted); margin-bottom: 20px;">
+          Нет аккаунта? <a href="register.php" style="color: #7f56da; text-decoration: none; font-weight: bold;">Зарегистрироваться</a>
+        </div>
+
+        <div style="border-top: 1px solid var(--color-border); padding-top: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+            
+            <a href="google-auth.php" style="display: inline-flex; align-items: center; justify-content: center; background-color: #161616; color: #F2F2F2; border: 1px solid #2A2A2A; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; width: 100%; box-sizing: border-box; transition: background 0.3s;">
+                <svg style="width: 18px; height: 18px; margin-right: 10px;" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.227-3.11C18.28 1.845 15.548 1 12.24 1 5.48 1 0 6.48 0 13.2s5.48 12.2 12.24 12.2c7.055 0 11.75-4.96 11.75-11.96 0-.81-.08-1.425-.195-2.155H12.24z"/>
+                </svg>
+                Войти через Google
+            </a>
+
+            <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-login="truew_auth_bot" 
+                    data-size="large" 
+                    data-auth-url="http://lavetain.ru/telegram-auth.php" 
+                    data-request-access="write">
+            </script>
+            
+        </div>
       </form>
     </div>
   </div>
